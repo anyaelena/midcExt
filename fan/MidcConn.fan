@@ -17,8 +17,15 @@ class MidcConn : Conn
   new make(ConnActor actor, Dict rec) : super(actor, rec) {}
 
   override Obj? receive(ConnMsg msg) { 
-    // Todo receive udppacket from background actor that receives broadcast and update point curvals
-    return super.receive(msg) 
+    if (msg.id == "udpbroadcast") {
+      
+      log.info("received something in midcConn receive")
+      //TODO parse msg and update points
+      return null
+    }
+    else {
+      return super.receive(msg) 
+    }
   }
 
   override Void onOpen() { 

@@ -25,29 +25,13 @@ using inet
 const class MidcExt : ConnImplExt
 {
   @NoDoc new make() : super(MidcModel()) {}
+  const MidcConnActor receiveActor := MidcConnActor(ActorPool(),this)
   override Void onStart() {
-    log.info("in onstart for midcExt")
-    pool := ActorPool()
-    // todo one actor for each midcConn rec (listen on different ports)
-    a := Actor(pool) |->Obj?| {
-      log.info("in receive for actor")
-      socket := UdpSocket.make
-      socket.bind(null,50260)  //todo dynamic port for each midcConn rec
-      log.info("midc socket bound successfully")
-      try {
-        while (true) {
-          packet := socket.receive //receive is blocking. packet is of type inet::UdpPacket
-          // log.info("packet received. trying to make sense of it")
-          // log.info("ip: " + packet.addr)
-          // log.info("port: " + packet.port)      
-          //send to actor for appropriate MidcConn (based on port?)
-        }
-        return null
-      } finally {
-        log.info("closing socket")
-        socket.close // So we make sure the socket doesn't linger
-      }
-    }.send(null)
-    return super.onStart()
+    receiveActor.start
+    super.onStart()
+  }
+  override Void onStop() {
+    receiveActor.stop
+    super.onStop()
   }
 }
