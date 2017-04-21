@@ -19,8 +19,15 @@ class MidcConn : Conn
   override Obj? receive(ConnMsg msg) { 
     if (msg.id == "udpbroadcast") {
       
-      log.info("received something in midcConn receive")
-      //TODO parse msg and update points
+      data := (Str[])msg.a
+      log.info("received "+ data.typeof +" in midcConn receive")
+
+      //2017-04-14_11-24-00 sample incoming datetime format (always mountain time, never DST)
+      // Parse as AZ time, as this does not use DST.
+      ts := DateTime.fromLocale(data[0],"YYYY-MM-DD_hh-mm-ss",TimeZone.fromStr("America/Phoenix")) 
+      log.info("parsed timestamp: " + ts.toHttpStr) 
+       
+
       return null
     }
     else {

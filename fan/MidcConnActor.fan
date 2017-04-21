@@ -42,7 +42,8 @@ const class MidcConnActor : Actor {
             try {
               connRec := ext.proj.read("midcConn")
               connActor := ext.connActor(connRec)
-              data := packet.data.flip
+              // TODO error handling
+              data := packet.data.flip.readLine.split(',') 
               msg = ConnMsg("udpbroadcast", data) 
               connActor.send(msg)
             }
