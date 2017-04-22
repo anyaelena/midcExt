@@ -25,13 +25,27 @@ using inet
 const class MidcExt : ConnImplExt
 {
   @NoDoc new make() : super(MidcModel()) {}
-  const MidcConnActor receiveActor := MidcConnActor(ActorPool(),this)
+  const ActorPool pool := ActorPool()
+  // This is a hack that assumes we have exactly 2 connectors, on ports 50260 and 50160
+  const MidcConnActor[] receiveActors := MidcConnActor[MidcConnActor(pool, this, 50160),MidcConnActor(pool, this, 50260)]
   override Void onStart() {
-    receiveActor.start
+    // conns := this.proj.readAll("midcConn")
+    // log.info("midcConn records: $conns.size")
+    // conns.each |conn| {
+    //   port := (Number)conn["port"]
+    //   a := MidcConnActor(pool, this, port.toInt)
+    //   receiveActors.add(a)
+    // }
+    // receiveActor.start
+    receiveActors.each |a| {
+      a.start
+    }
     super.onStart()
   }
   override Void onStop() {
-    receiveActor.stop
+    receiveActors.each |a| {
+      a.stop
+    }
     super.onStop()
   }
 }

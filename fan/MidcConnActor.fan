@@ -14,11 +14,14 @@ using inet
 ** MidcConnActor
 **
 const class MidcConnActor : Actor {
-  new make(ActorPool pool, MidcExt ext) : super.make(pool) { 
+  new make(ActorPool pool, MidcExt ext, Int port) : super.make(pool) { 
     this.ext = ext 
+    this.port = port
   }
 
   const MidcExt ext
+  const Int port
+
   Void start() { send("start") }
 
   Void stop() { isAlive.val = false }
@@ -26,23 +29,19 @@ const class MidcConnActor : Actor {
   override Obj? receive(Obj? msg)
   {
     socket := UdpSocket.make
-    socket.bind(null,50260)  //todo dynamic port for each midcConn rec
-    ext.log.info("midc socket bound successfully")
-
-    //look up connection rec - for now assume exactly one  / ext 
-    // TODO allow multiple conn recs for different ports
-    // TODO handle error if no rec or connActor found
+    socket.bind(null,port)  
+    ext.log.info("midc socket bound successfully on port $port")
 
     while (isAlive.val)
     {
       try {
         packet := socket.receive //receive is blocking. packet is of type inet::UdpPacket
-        // connActor.send(packet)
-        ext.log.info("packet received. trying to make sense of it")
-            try {
-              connRec := ext.proj.read("midcConn")
-              connActor := ext.connActor(connRec)
+        ext.log.info("packet received on port $port")
+            try { 
               // TODO error handling
+              connRec := ext.proj.read("midcConn and port==$port")
+              connActor := ext.connActor(connRec)
+              
               data := packet.data.flip.readLine.split(',') 
               msg = ConnMsg("udpbroadcast", data) 
               connActor.send(msg)
