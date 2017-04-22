@@ -18,20 +18,16 @@ class MidcConn : Conn
 
   override Obj? receive(ConnMsg msg) { 
     if (msg.id == "udpbroadcast") {
-      
       data := (Str[])msg.a
       
-      //2017-04-14_11-24-00 sample incoming datetime format 
-      // Format is always mountain time without daylight savings, so just parse as AZ time
-      ts := DateTime.fromLocale(data[0],"YYYY-MM-DD_hh-mm-ss",TimeZone.fromStr("America/Phoenix")) 
-      log.info("parsed timestamp: " + ts.toHttpStr) 
-      pts := this.points
-      // log.info("points count "+points.size)
-      points.each |pt, i| {
+      // Timestamp format is always mountain time without daylight savings, so just parse as AZ time and then convert to Denver
+      ts := DateTime.fromLocale(data[0],"YYYY-MM-DD_hh-mm-ss",TimeZone.fromStr("America/Phoenix")).toTimeZone(TimeZone.fromStr("Denver"))
+      this.points.each |pt, i| {
         tmp := (Number)pt.rec["udpPayloadIndex"]
         payloadIndex := tmp.toInt
-        // log.info("point: " + pt.dis + " val: " + data[payloadIndex])
-        pt.updateCurOk(Number(data[payloadIndex]))
+        vals := HisItem[HisItem(ts, Number(data[payloadIndex]))]
+        res := pt.updateHisOk(vals, Span("today")) 
+        //log.debug("result of updatehisok: $res")
       }
 
       return null
