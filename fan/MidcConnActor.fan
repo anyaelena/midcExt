@@ -36,7 +36,7 @@ const class MidcConnActor : Actor {
     {
       try {
         packet := socket.receive //receive is blocking. packet is of type inet::UdpPacket
-        ext.log.info("packet received on port $port")
+        // ext.log.info("packet received on port $port")
             try { 
               // TODO error handling
               connRec := ext.proj.read("midcConn and port==$port")
